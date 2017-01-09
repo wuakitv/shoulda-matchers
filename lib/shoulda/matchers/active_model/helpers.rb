@@ -21,7 +21,7 @@ module Shoulda
           attribute = options.delete(:attribute)
           instance = options.delete(:instance)
 
-          RailsShim.generate_validation_message(
+          RailsShim.validation_message(
             instance,
             attribute.to_sym,
             type,

@@ -502,7 +502,8 @@ describe Shoulda::Matchers::ActionController::PermitMatcher, type: :controller d
 
           matcher.matches?(controller)
 
-          expect(context).to have_received(:patch).with(:update, expected_params)
+          expect(context)
+            .to have_received(:patch).with(:update, expected_params)
         end
       else
         it 'PUTs to the controller' do
