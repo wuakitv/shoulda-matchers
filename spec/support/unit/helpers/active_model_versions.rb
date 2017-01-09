@@ -21,6 +21,10 @@ module UnitTests
       ::ActiveModel::VERSION::MAJOR == 4
     end
 
+    def active_model_lte_4?
+      ::ActiveModel::VERSION::MAJOR <= 4
+    end
+
     def active_model_supports_strict?
       active_model_version >= 3.2
     end
