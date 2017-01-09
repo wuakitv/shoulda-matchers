@@ -59,15 +59,15 @@ module Shoulda
           ]
 
           primary_translation_key = [
-            "activerecord.errors.models",
+            'activerecord.errors.models',
             model_name,
-            "attributes",
+            'attributes',
             attribute,
             type,
-          ].join(".").to_sym
+          ].join('.').to_sym
 
           translate_options = {
-            default: default_translation_keys
+            default: default_translation_keys,
           }.merge(options)
 
           I18n.translate(primary_translation_key, translate_options)
