@@ -2,21 +2,37 @@ module Shoulda
   module Matchers
     # @private
     class RailsShim
-      def self.verb_for_update
-        if action_pack_gte_4_1?
-          :patch
-        else
-          :put
-        end
+      def self.action_pack_gte_4_1?
+        Gem::Requirement.new('>= 4.1').satisfied_by?(action_pack_version)
       end
 
-      def self.type_cast_default_for(model, column)
-        if model.respond_to?(:column_defaults)
-          # Rails 4.2
-          model.column_defaults[column.name]
+      def self.action_pack_version
+        Gem::Version.new(::ActionPack::VERSION::STRING)
+      end
+
+      def self.active_record_major_version
+        ::ActiveRecord::VERSION::MAJOR
+      end
+
+      def self.generate_validation_message(record, attribute, type, model_name, options)
+        if record && record.errors.respond_to?(:generate_message)
+          record.errors.generate_message(attribute.to_sym, type, options)
         else
-          column.default
+          simply_generate_validation_message(attribute, type, model_name, options)
         end
+      rescue RangeError
+        simply_generate_validation_message(attribute, type, model_name, options)
+      end
+
+      def self.make_controller_request(context, verb, action, request_params)
+        params =
+          if active_record_major_version >= 5
+            { params: request_params }
+          else
+            request_params
+          end
+
+        context.__send__(verb, action, params)
       end
 
       def self.serialized_attributes_for(model)
@@ -33,16 +49,6 @@ module Shoulda
         end
       end
 
-      def self.generate_validation_message(record, attribute, type, model_name, options)
-        if record && record.errors.respond_to?(:generate_message)
-          record.errors.generate_message(attribute.to_sym, type, options)
-        else
-          simply_generate_validation_message(attribute, type, model_name, options)
-        end
-      rescue RangeError
-        simply_generate_validation_message(attribute, type, model_name, options)
-      end
-
       def self.simply_generate_validation_message(attribute, type, model_name, options)
         default_translation_keys = [
           :"activerecord.errors.models.#{model_name}.#{type}",
@@ -55,27 +61,21 @@ module Shoulda
         I18n.translate(primary_translation_key, translate_options)
       end
 
-      def self.active_record_major_version
-        ::ActiveRecord::VERSION::MAJOR
+      def self.type_cast_default_for(model, column)
+        if model.respond_to?(:column_defaults)
+          # Rails 4.2
+          model.column_defaults[column.name]
+        else
+          column.default
+        end
       end
 
-      def self.action_pack_gte_4_1?
-        Gem::Requirement.new('>= 4.1').satisfied_by?(action_pack_version)
-      end
-
-      def self.action_pack_version
-        Gem::Version.new(::ActionPack::VERSION::STRING)
-      end
-
-      def self.make_controller_request(context, verb, action, request_params)
-        params =
-          if active_record_major_version >= 5
-            { params: request_params }
-          else
-            request_params
-          end
-
-        context.__send__(verb, action, params)
+      def self.verb_for_update
+        if action_pack_gte_4_1?
+          :patch
+        else
+          :put
+        end
       end
     end
   end
