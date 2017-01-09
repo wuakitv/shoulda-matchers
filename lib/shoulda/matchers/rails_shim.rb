@@ -66,6 +66,17 @@ module Shoulda
       def self.action_pack_version
         Gem::Version.new(::ActionPack::VERSION::STRING)
       end
+
+      def self.make_controller_request(context, verb, action, request_params)
+        params =
+          if active_record_major_version >= 5
+            { params: request_params }
+          else
+            request_params
+          end
+
+        context.__send__(verb, action, params)
+      end
     end
   end
 end
