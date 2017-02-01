@@ -10,3 +10,4 @@ pkg
 source
 spec/examples.txt
 tmp
+vendor
